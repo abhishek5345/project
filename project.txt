@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HTML Poster Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:wght@600;800&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #0f172a; /* slate-900 */
+      --card: #111827; /* gray-900 */
+      --muted: #9ca3af; /* gray-400 */
+      --accent: #22d3ee; /* cyan-400 */
+      --ring: #38bdf8; /* sky-400 */
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: linear-gradient(120deg, #0b1023, #111827 60%, #0b1023);
+      color:#e5e7eb;
+    }
+    .container{max-width:1200px; margin:40px auto; padding:0 16px}
+    .app{display:grid; grid-template-columns: 420px 1fr; gap:18px}
+    @media (max-width: 980px){.app{grid-template-columns:1fr}}
+
+    .panel{
+      background:rgba(17,24,39,0.9);
+      backdrop-filter: blur(8px);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:16px; padding:18px; box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .title{font-weight:800; font-size:28px; letter-spacing:0.2px; margin:0 0 6px}
+    .subtitle{color:var(--muted); margin:0 0 16px}
+    label{display:block; font-size:12px; color:#cbd5e1; margin:14px 0 6px}
+    input[type="text"], textarea, select, input[type="number"], input[type="color"]{
+      width:100%; background:#0b1220; color:#e5e7eb; border:1px solid rgba(255,255,255,0.08);
+      outline:none; border-radius:10px; padding:10px 12px; font:inherit;
+    }
+    textarea{min-height:84px; resize:vertical}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px}
+    button{
+      background:linear-gradient(180deg, var(--accent), var(--ring)); color:#05121f; border:0; padding:10px 14px; border-radius:12px; font-weight:700; cursor:pointer;
+      box-shadow:0 8px 18px rgba(34,211,238,0.25);
+    }
+    button.secondary{background:#0b1220; color:#e5e7eb; border:1px solid rgba(255,255,255,0.08); box-shadow:none}
+    canvas{width:100%; height:auto; background:#000; border-radius:16px; display:block}
+    .preview-wrap{position:relative}
+    .badge{
+      position:absolute; top:12px; left:12px; padding:6px 10px; border-radius:999px; background:rgba(2,6,23,0.6); color:#cbd5e1; font-size:12px; border:1px solid rgba(255,255,255,0.08);
+    }
+    .small{font-size:12px; color:#94a3b8}
+    .grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+    .sp{-webkit-appearance:none; appearance:none}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">Poster Generator</h1>
+    <p class="subtitle">Design a crisp poster in your browser. Type, tweak, and download as PNG.</p>
+
+    <div class="app">
+      <!-- Controls -->
+      <section class="panel" aria-label="Controls">
+        <div class="row">
+          <div>
+            <label>Preset</label>
+            <select id="preset">
+              <option value="modern">Modern Neon</option>
+              <option value="elegant">Elegant Serif</option>
+              <option value="bold">Bold Minimal</option>
+              <option value="sunset">Sunset Gradient</option>
+            </select>
+          </div>
+          <div>
+            <label>Size</label>
+            <select id="size">
+              <option value="1080x1350">Instagram Portrait (1080×1350)</option>
+              <option value="1080x1920">Story (1080×1920)</option>
+              <option value="1200x1800">Poster (2:3 – 1200×1800)</option>
+              <option value="2480x3508">A4 @300dpi (2480×3508)</option>
+            </select>
+          </div>
+        </div>
+
+        <label>Title</label>
+        <input id="title" type="text" placeholder="Your Big Headline" value="Open Day 2025" />
+
+        <label>Subtitle</label>
+        <input id="subtitle" type="text" placeholder="Tagline or short hook" value="Explore • Create • Learn" />
+
+        <label>Body</label>
+        <textarea id="body" placeholder="Add details like date, venue, speakers…">Aug 25 • 10:00–16:00\nInnovation Hall, Block B\nFree entry • All welcome</textarea>
+
+        <label>Footer</label>
+        <input id="footer" type="text" placeholder="Website • Contact" value="example.edu/events" />
+
+        <div class="row">
+          <div>
+            <label>Primary Color</label>
+            <input id="primary" type="color" value="#22d3ee" />
+          </div>
+          <div>
+            <label>Secondary Color</label>
+            <input id="secondary" type="color" value="#111827" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Font Family</label>
+            <select id="font">
+              <option value="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial">Inter (Sans)</option>
+              <option value="Poppins, Arial, sans-serif">Poppins (Sans)</option>
+              <option value="Playfair Display, Georgia, serif">Playfair (Serif)</option>
+            </select>
+          </div>
+          <div>
+            <label>Text Align</label>
+            <select id="align">
+              <option value="center">Center</option>
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Padding (px)</label>
+            <input id="padding" type="number" min="40" max="240" step="10" value="100" />
+          </div>
+          <div>
+            <label>Corner Radius</label>
+            <input id="radius" type="number" min="0" max="200" step="5" value="32" />
+          </div>
+        </div>
+
+        <label>Background Image (optional)</label>
+        <input id="bgimg" type="file" accept="image/*" />
+        <div class="small">Tip: Use a large, high‑resolution image for sharp results.</div>
+
+        <div class="btns">
+          <button id="render">Generate</button>
+          <button id="download" class="secondary">Download PNG</button>
+          <button id="clear" class="secondary">Reset</button>
+        </div>
+      </section>
+
+      <!-- Preview -->
+      <section class="panel preview-wrap" aria-label="Preview">
+        <span class="badge" id="sizeBadge">1080×1350</span>
+        <canvas id="poster" width="1080" height="1350" aria-label="Poster Canvas"></canvas>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    const state = {
+      bgImage: null,
+    };
+
+    const sizes = {
+      "1080x1350": [1080, 1350],
+      "1080x1920": [1080, 1920],
+      "1200x1800": [1200, 1800],
+      "2480x3508": [2480, 3508],
+    };
+
+    function applyPreset(name){
+      const primary = $("primary");
+      const secondary = $("secondary");
+      const font = $("font");
+      const align = $("align");
+      const radius = $("radius");
+      const padding = $("padding");
+
+      if(name === 'modern'){
+        primary.value = '#22d3ee';
+        secondary.value = '#111827';
+        font.value = 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial';
+        align.value = 'center';
+        radius.value = 32; padding.value = 100;
+      } else if(name === 'elegant'){
+        primary.value = '#ffffff';
+        secondary.value = '#111827';
+        font.value = 'Playfair Display, Georgia, serif';
+        align.value = 'center';
+        radius.value = 8; padding.value = 120;
+      } else if(name === 'bold'){
+        primary.value = '#ffffff';
+        secondary.value = '#000000';
+        font.value = 'Poppins, Arial, sans-serif';
+        align.value = 'left';
+        radius.value = 0; padding.value = 120;
+      } else if(name === 'sunset'){
+        primary.value = '#f59e0b';
+        secondary.value = '#7c3aed';
+        font.value = 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial';
+        align.value = 'center';
+        radius.value = 24; padding.value = 110;
+      }
+    }
+
+    $("preset").addEventListener('change', (e)=>{
+      applyPreset(e.target.value);
+      render();
+    });
+
+    $("size").addEventListener('change', (e)=>{
+      const [w,h] = sizes[e.target.value];
+      const c = $("poster");
+      c.width = w; c.height = h;
+      $("sizeBadge").textContent = `${w}×${h}`;
+      render();
+    });
+
+    $("bgimg").addEventListener('change', (e)=>{
+      const file = e.target.files?.[0];
+      if(!file){ state.bgImage = null; render(); return; }
+      const img = new Image();
+      img.onload = ()=>{ state.bgImage = img; render(); };
+      img.src = URL.createObjectURL(file);
+    });
+
+    $("clear").addEventListener('click', ()=>{
+      $("title").value = 'Open Day 2025';
+      $("subtitle").value = 'Explore • Create • Learn';
+      $("body").value = 'Aug 25 • 10:00–16:00\nInnovation Hall, Block B\nFree entry • All welcome';
+      $("footer").value = 'example.edu/events';
+      $("preset").value = 'modern';
+      $("size").value = '1080x1350';
+      $("bgimg").value = '';
+      state.bgImage = null;
+      applyPreset('modern');
+      const [w,h] = sizes['1080x1350'];
+      const c = $("poster"); c.width = w; c.height = h; $("sizeBadge").textContent = `${w}×${h}`;
+      render();
+    });
+
+    $("render").addEventListener('click', render);
+
+    $("download").addEventListener('click', ()=>{
+      const c = $("poster");
+      const a = document.createElement('a');
+      a.download = 'poster.png';
+      a.href = c.toDataURL('image/png');
+      a.click();
+    });
+
+    function roundRect(ctx, x, y, w, h, r){
+      const radius = Math.min(r, w/2, h/2);
+      ctx.beginPath();
+      ctx.moveTo(x+radius, y);
+      ctx.arcTo(x+w, y, x+w, y+h, radius);
+      ctx.arcTo(x+w, y+h, x, y+h, radius);
+      ctx.arcTo(x, y+h, x, y, radius);
+      ctx.arcTo(x, y, x+w, y, radius);
+      ctx.closePath();
+    }
+
+    function drawImageCover(ctx, img, x, y, w, h){
+      const imgRatio = img.width / img.height;
+      const boxRatio = w / h;
+      let dw = w, dh = h, dx = x, dy = y;
+      if(imgRatio > boxRatio){
+        dh = h; dw = dh * imgRatio; dx = x - (dw - w)/2;
+      } else {
+        dw = w; dh = dw / imgRatio; dy = y - (dh - h)/2;
+      }
+      ctx.drawImage(img, dx, dy, dw, dh);
+    }
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight, align){
+      const words = (text||'').split(/\s+/);
+      let line = '', lines = [];
+      for(const w of words){
+        const test = line ? line + ' ' + w : w;
+        if(ctx.measureText(test).width > maxWidth && line){
+          lines.push(line); line = w;
+        } else {
+          line = test;
+        }
+      }
+      if(line) lines.push(line);
+      let yy = y;
+      ctx.textAlign = align;
+      for(const ln of lines){
+        ctx.fillText(ln, x, yy);
+        yy += lineHeight;
+      }
+      return yy;
+    }
+
+    function render(){
+      const c = $("poster");
+      const ctx = c.getContext('2d');
+      const W = c.width, H = c.height;
+
+      // Read controls
+      const title = $("title").value.trim();
+      const subtitle = $("subtitle").value.trim();
+      const body = $("body").value.trim();
+      const footer = $("footer").value.trim();
+      const primary = $("primary").value;
+      const secondary = $("secondary").value;
+      const font = $("font").value;
+      const align = $("align").value;
+      const pad = parseInt($("padding").value,10) || 100;
+      const radius = parseInt($("radius").value,10) || 24;
+
+      // Clear
+      ctx.clearRect(0,0,W,H);
+
+      // Background panel with optional image
+      ctx.save();
+      roundRect(ctx, 0, 0, W, H, radius);
+      ctx.clip();
+
+      // Gradient base
+      const grad = ctx.createLinearGradient(0,0,W,H);
+      grad.addColorStop(0, secondary);
+      grad.addColorStop(1, '#0b1220');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0,0,W,H);
+
+      if(state.bgImage){
+        drawImageCover(ctx, state.bgImage, 0, 0, W, H);
+        // Dark overlay to improve contrast
+        const g2 = ctx.createLinearGradient(0,0,0,H);
+        g2.addColorStop(0, 'rgba(0,0,0,0.2)');
+        g2.addColorStop(1, 'rgba(0,0,0,0.55)');
+        ctx.fillStyle = g2; ctx.fillRect(0,0,W,H);
+      }
+      ctx.restore();
+
+      // Glow frame
+      ctx.strokeStyle = primary;
+      ctx.lineWidth = Math.max(6, Math.round(W*0.006));
+      roundRect(ctx, Math.max(6, radius/2), Math.max(6, radius/2), W-Math.max(12, radius), H-Math.max(12, radius), Math.max(6, radius/2));
+      ctx.stroke();
+
+      // Text styles
+      const centerX = align === 'left' ? pad : (align === 'right' ? W-pad : W/2);
+      const maxText = W - pad*2;
+
+      // Subtitle (small caps)
+      ctx.font = `600 ${Math.round(W*0.028)}px ${font}`;
+      ctx.fillStyle = '#e5e7eb';
+      ctx.textBaseline = 'top';
+      ctx.textAlign = align;
+      const subY = pad;
+      ctx.globalAlpha = 0.9;
+      wrapText(ctx, subtitle.toUpperCase(), centerX, subY, maxText, Math.round(W*0.034), align);
+
+      // Title
+      ctx.globalAlpha = 1;
+      ctx.font = `800 ${Math.round(W*0.085)}px ${font}`;
+      ctx.fillStyle = primary;
+      ctx.shadowColor = primary; ctx.shadowBlur = Math.round(W*0.015);
+      const titleY = subY + Math.round(W*0.10);
+      const afterTitleY = wrapText(ctx, title, centerX, titleY, maxText, Math.round(W*0.10), align) + Math.round(W*0.02);
+      ctx.shadowBlur = 0;
+
+      // Body
+      ctx.font = `400 ${Math.round(W*0.035)}px ${font}`;
+      ctx.fillStyle = '#f8fafc';
+      const bodyY = afterTitleY;
+      const afterBodyY = wrapText(ctx, body, centerX, bodyY, maxText, Math.round(W*0.055), align);
+
+      // Footer
+      ctx.font = `600 ${Math.round(W*0.028)}px ${font}`;
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.textBaseline = 'bottom';
+      ctx.textAlign = align;
+      ctx.fillText(footer, centerX, H - pad);
+
+      // Corner badges (decor)
+      ctx.globalAlpha = 0.25;
+      ctx.fillStyle = primary;
+      ctx.beginPath();
+      ctx.arc(pad*0.8, H - pad*0.8, Math.max(24, Math.round(W*0.02)), 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    // Initial
+    applyPreset('modern');
+    render();
+  </script>
+</body>
+</html>
